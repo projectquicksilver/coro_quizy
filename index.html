@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macao Quiz – ABM</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sky: #87CEEB;
+  --grass: #7BC67A;
+  --white: #ffffff;
+  --text: #2a2d35;
+  --mid: #636E72;
+  --oa: #FF6B6B;  --oa-bg: #fff5f5;
+  --ob: #00C9A7;  --ob-bg: #f0fffe;
+  --oc: #4A90D9;  --oc-bg: #f0f6ff;
+  --od: #FFB830;  --od-bg: #fffbf0;
+  --purple: #9B5DE5;
+  --card-shadow: 0 6px 0 rgba(0,0,0,0.10), 0 2px 24px rgba(0,0,0,0.07);
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #6ec6f0 0%, #a8daf5 30%, #c5e8f7 55%, #d4efb8 75%, #a8d986 100%);
+  overflow-x: hidden;
+}
+
+/* ── SCENE BACKGROUND ── */
+.scene-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.cloud {
+  position: absolute;
+  background: white;
+  border-radius: 40px;
+  opacity: 0.82;
+}
+.cloud::before, .cloud::after {
+  content: ''; position: absolute; background: white; border-radius: 50%;
+}
+.c1 { width: 120px; height: 36px; top: 8%; left: 5%; animation: cloudDrift 28s linear infinite; }
+.c1::before { width: 50px; height: 50px; top: -22px; left: 18px; }
+.c1::after  { width: 38px; height: 38px; top: -14px; left: 52px; }
+.c2 { width: 90px;  height: 28px; top: 14%; left: 55%; animation: cloudDrift 38s linear infinite; opacity: 0.65; }
+.c2::before { width: 40px; height: 40px; top: -18px; left: 12px; }
+.c2::after  { width: 30px; height: 30px; top: -10px; left: 40px; }
+.c3 { width: 150px; height: 42px; top: 5%; left: 75%; animation: cloudDrift 22s linear infinite; }
+.c3::before { width: 60px; height: 60px; top: -28px; left: 22px; }
+.c3::after  { width: 44px; height: 44px; top: -18px; left: 68px; }
+.c4 { width: 80px; height: 24px; top: 20%; left: 30%; animation: cloudDrift 45s linear infinite; opacity: 0.5; }
+.c4::before { width: 34px; height: 34px; top: -14px; left: 10px; }
+.c4::after  { width: 26px; height: 26px; top: -8px; left: 35px; }
+@keyframes cloudDrift {
+  0%   { transform: translateX(-200px); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+/* Stars at top edge */
+.bg-star { position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; opacity: 0.4; }
+
+/* ── LAYOUT ── */
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+}
+
+/* ── HERO ── */
+.quiz-hero {
+  text-align: center;
+  padding: 60px 24px 48px;
+}
+.hero-mascot { font-size: 80px; margin-bottom: 16px; animation: mascotBounce 2s ease-in-out infinite; display: inline-block; }
+@keyframes mascotBounce {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50%     { transform: translateY(-10px) rotate(3deg); }
+}
+.quiz-hero h1 {
+  font-size: clamp(32px, 6vw, 58px);
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 3px 0 rgba(0,0,0,0.15), 0 6px 20px rgba(0,0,0,0.1);
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.quiz-hero p {
+  font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85);
+  margin-bottom: 32px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.start-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #FF6B35; color: white;
+  font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 18px;
+  padding: 16px 40px; border-radius: 100px; border: none; cursor: pointer;
+  box-shadow: 0 5px 0 #c94f20, 0 8px 20px rgba(255,107,53,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 #c94f20, 0 12px 24px rgba(255,107,53,0.4); }
+.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #c94f20; }
+
+/* Fun badges */
+.hero-badges {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.hero-badge {
+  background: rgba(255,255,255,0.25); backdrop-filter: blur(4px);
+  border: 2px solid rgba(255,255,255,0.5);
+  border-radius: 100px; padding: 7px 16px;
+  font-size: 13px; font-weight: 800; color: white;
+}
+
+/* ── QUIZ WRAP ── */
+.quiz-wrap { display: none; }
+.quiz-wrap.active { display: block; }
+
+/* Progress */
+.progress-wrap { margin-bottom: 24px; }
+.progress-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.progress-label { font-size: 14px; font-weight: 800; color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.score-badge {
+  background: #FFD700; color: #5a3800;
+  font-weight: 900; font-size: 14px;
+  padding: 5px 14px; border-radius: 100px;
+  box-shadow: 0 3px 0 #c9a800;
+}
+.progress-track {
+  height: 14px; background: rgba(255,255,255,0.35);
+  border-radius: 100px; overflow: visible; position: relative;
+  border: 2px solid rgba(255,255,255,0.5);
+}
+.progress-fill {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, #FF6B35, #FFD700);
+  transition: width 0.6s cubic-bezier(0.34,1.2,0.64,1);
+  position: relative;
+}
+.progress-cat {
+  position: absolute; right: -12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px; line-height: 1;
+}
+
+/* ── QUESTION CARD ── */
+.question-card {
+  background: white;
+  border-radius: 24px;
+  padding: 36px 36px 32px;
+  box-shadow: var(--card-shadow);
+  border-top: 5px solid var(--purple);
+  animation: cardBounceIn 0.45s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes cardBounceIn {
+  0%  { transform: translateY(50px) scale(0.93); opacity: 0; }
+  100%{ transform: translateY(0) scale(1); opacity: 1; }
+}
+.q-number {
+  display: inline-block;
+  background: var(--purple); color: white;
+  font-size: 11px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 14px; border-radius: 100px;
+  margin-bottom: 14px;
+}
+.q-text {
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 800; line-height: 1.4; color: var(--text);
+  margin-bottom: 28px;
+}
+
+/* ── BUBBLE OPTIONS ── */
+.bubble-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+@media (max-width: 480px) { .bubble-grid { grid-template-columns: 1fr; } }
+
+.bubble-opt {
+  display: flex; align-items: center; gap: 13px;
+  background: white; border-radius: 18px;
+  border: 3px solid #e0e0e0;
+  padding: 15px 18px;
+  cursor: pointer; text-align: left;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; color: var(--text);
+  transition: transform 0.18s, box-shadow 0.18s;
+  animation: bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;
+  line-height: 1.35;
+}
+.bubble-opt:nth-child(1) { animation-delay:0.06s; border-color:var(--oa); background:var(--oa-bg); }
+.bubble-opt:nth-child(2) { animation-delay:0.13s; border-color:var(--ob); background:var(--ob-bg); }
+.bubble-opt:nth-child(3) { animation-delay:0.20s; border-color:var(--oc); background:var(--oc-bg); }
+.bubble-opt:nth-child(4) { animation-delay:0.27s; border-color:var(--od); background:var(--od-bg); }
+.bubble-opt:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.bubble-opt:active:not(:disabled) { transform: translateY(1px); }
+.bubble-opt:disabled { cursor: default; }
+
+@keyframes bubbleIn {
+  0%  { transform: translateY(55px) scale(0.82); opacity:0; }
+  65% { transform: translateY(-7px) scale(1.04); }
+  82% { transform: translateY(4px) scale(0.98); }
+  100%{ transform: translateY(0) scale(1); opacity:1; }
+}
+
+.bubble-letter {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 15px; color: white; flex-shrink: 0;
+}
+.bubble-opt:nth-child(1) .bubble-letter { background: var(--oa); }
+.bubble-opt:nth-child(2) .bubble-letter { background: var(--ob); }
+.bubble-opt:nth-child(3) .bubble-letter { background: var(--oc); }
+.bubble-opt:nth-child(4) .bubble-letter { background: var(--od); }
+
+.bubble-opt.b-correct { background:#e8fce8; border-color:#34C759; animation:popCorrect 0.45s cubic-bezier(0.34,1.5,0.64,1); }
+.bubble-opt.b-correct .bubble-letter { background:#34C759; }
+.bubble-opt.b-wrong   { background:#fff0f0; border-color:#FF3B30; animation:shakeWrong 0.42s ease; }
+.bubble-opt.b-wrong   .bubble-letter { background:#FF3B30; }
+.bubble-opt.b-dim     { opacity:0.3; filter:grayscale(0.7); }
+
+@keyframes popCorrect {
+  0%  { transform: scale(1); }
+  35% { transform: scale(1.1); }
+  65% { transform: scale(0.96); }
+  100%{ transform: scale(1); }
+}
+@keyframes shakeWrong {
+  0%,100%{ transform: translateX(0); }
+  20%    { transform: translateX(-8px) rotate(-1deg); }
+  40%    { transform: translateX(8px) rotate(1deg); }
+  60%    { transform: translateX(-5px); }
+  80%    { transform: translateX(5px); }
+}
+
+/* ── CARD FLIP OPTIONS ── */
+.flip-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 480px) { .flip-grid { grid-template-columns: 1fr; } }
+
+.flip-card {
+  height: 90px; perspective: 600px; cursor: pointer;
+  animation: bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;
+}
+.flip-card:nth-child(1){ animation-delay:0.05s; }
+.flip-card:nth-child(2){ animation-delay:0.12s; }
+.flip-card:nth-child(3){ animation-delay:0.19s; }
+.flip-card:nth-child(4){ animation-delay:0.26s; }
+
+.flip-inner {
+  width:100%; height:100%; position:relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.34,1.2,0.64,1);
+}
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+
+.flip-front, .flip-back {
+  position:absolute; inset:0; border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  backface-visibility: hidden;
+  font-family:'Nunito',sans-serif; font-weight:800;
+}
+.flip-front {
+  background: linear-gradient(135deg, #C77DFF, #9B5DE5);
+  font-size: 36px;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.12);
+}
+.flip-back {
+  transform: rotateY(180deg);
+  padding: 12px 16px; gap:10px;
+  font-size: 13px; color: var(--text); text-align:left;
+  border: 3px solid;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+.flip-card:nth-child(1) .flip-back { border-color:var(--oa); background:var(--oa-bg); }
+.flip-card:nth-child(2) .flip-back { border-color:var(--ob); background:var(--ob-bg); }
+.flip-card:nth-child(3) .flip-back { border-color:var(--oc); background:var(--oc-bg); }
+.flip-card:nth-child(4) .flip-back { border-color:var(--od); background:var(--od-bg); }
+
+.flip-badge {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:14px; color:white; flex-shrink:0;
+}
+.flip-card:nth-child(1) .flip-badge { background:var(--oa); }
+.flip-card:nth-child(2) .flip-badge { background:var(--ob); }
+.flip-card:nth-child(3) .flip-badge { background:var(--oc); }
+.flip-card:nth-child(4) .flip-badge { background:var(--od); }
+
+.flip-card.fc-correct .flip-back { background:#e8fce8; border-color:#34C759; animation:popCorrect 0.45s ease; }
+.flip-card.fc-correct .flip-badge { background:#34C759; }
+.flip-card.fc-wrong   .flip-back { background:#fff0f0; border-color:#FF3B30; animation:shakeWrong 0.42s ease; }
+.flip-card.fc-wrong   .flip-badge { background:#FF3B30; }
+.flip-card.fc-dim     { opacity:0.3; filter:grayscale(0.7); }
+
+/* Mode hint */
+.mode-hint {
+  font-size:12px; font-weight:700; color:#9B5DE5;
+  text-align:center; margin-bottom:12px; opacity:0.8; letter-spacing:0.05em;
+}
+
+/* ── FEEDBACK ── */
+.feedback-bar {
+  display:none; margin-top:18px; padding:14px 18px;
+  border-radius:14px; font-size:15px; font-weight:700;
+  align-items:center; gap:10px;
+}
+.feedback-bar.show { display:flex; animation:fadeUp 0.3s ease; }
+.fb-correct { background:#e8fce8; border:2px solid #34C759; color:#1a7a32; }
+.fb-wrong   { background:#fff0f0; border:2px solid #FF3B30; color:#cc1a10; }
+
+/* ── NEXT BUTTON ── */
+.next-btn {
+  display:none; width:100%; margin-top:20px;
+  padding:16px; border-radius:100px; border:none;
+  background:#FF6B35; color:white;
+  font-family:'Nunito',sans-serif; font-weight:900; font-size:16px;
+  cursor:pointer;
+  box-shadow: 0 4px 0 #c94f20;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.next-btn:hover { transform:translateY(-2px); box-shadow:0 6px 0 #c94f20; }
+.next-btn:active { transform:translateY(2px); box-shadow:0 1px 0 #c94f20; }
+.next-btn.show { display:block; animation:fadeUp 0.35s cubic-bezier(0.34,1.4,0.64,1); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── CARTOON TRAVEL SCENE ── */
+.travel-scene {
+  border-radius: 20px; overflow: hidden;
+  border: 3px solid rgba(255,255,255,0.6);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.ts-header {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 16px;
+  background: linear-gradient(90deg,#4a90d9,#9B5DE5);
+  color:white;
+}
+.ts-city { font-size:12px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase; }
+.ts-arrow { font-size:12px; opacity:0.7; }
+
+.ts-sky-lane   { height:82px; background:linear-gradient(180deg,#87CEEB 0%,#b8e4f9 100%); position:relative; overflow:hidden; }
+.ts-road-top   { height:54px; background:#52525e; border-top:3px solid #6b6b78; position:relative; overflow:hidden; }
+.ts-road-bot   { height:50px; background:#44444f; border-bottom:3px solid #6b6b78; position:relative; overflow:hidden; }
+.ts-water-lane { height:80px; background:linear-gradient(180deg,#2a9fd6 0%,#0d6fa8 100%); position:relative; overflow:hidden; }
+
+/* Road markings */
+.ts-road-top::after, .ts-road-bot::after {
+  content:''; position:absolute; top:50%; left:0; right:0; height:3px;
+  background:repeating-linear-gradient(90deg,rgba(255,215,0,0.5) 0,rgba(255,215,0,0.5) 18px,transparent 18px,transparent 38px);
+}
+
+/* Vehicles */
+.ts-veh {
+  position:absolute; left:14px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  transition: filter 0.25s, opacity 0.3s;
+}
+.ts-veh:hover:not(.tv-dim) { filter:drop-shadow(0 0 8px rgba(255,215,0,0.9)); }
+.tv-label { font-size:9px; font-weight:900; color:#FFD700; letter-spacing:0.12em; text-transform:uppercase; opacity:0; transition:opacity 0.2s; white-space:nowrap; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+.ts-veh:hover .tv-label { opacity:1; }
+.tv-dim { opacity:0.2; filter:grayscale(1); pointer-events:none; }
+
+@keyframes tvHover { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes tvBob   { 0%,100%{transform:translateY(0) rotate(0.3deg)} 50%{transform:translateY(-4px) rotate(-0.3deg)} }
+@keyframes tvRace  { 0%{left:14px} 8%{left:4px} 100%{left:calc(100% - 110px)} }
+@keyframes tvRotor { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+.tv-heli-idle { animation:tvHover 1.8s ease-in-out infinite; }
+.tv-ferry-idle { animation:tvBob 2.3s ease-in-out infinite; }
+.tv-rotor { transform-box:fill-box; transform-origin:center; animation:tvRotor 0.22s linear infinite; }
+
+/* Win banner */
+.tv-winner {
+  display:none; margin-top:16px; padding:18px 22px;
+  background:white; border-radius:16px; text-align:center;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.08), 0 2px 16px rgba(0,0,0,0.06);
+  border-top: 4px solid #FFD700;
+  animation:cardBounceIn 0.4s ease;
+}
+.tv-winner.show { display:block; }
+.tv-w-emoji { font-size:36px; margin-bottom:6px; }
+.tv-w-title { font-family:'Nunito',sans-serif; font-weight:900; font-size:18px; color:var(--text); margin-bottom:4px; }
+.tv-w-sub   { font-size:13px; color:var(--mid); font-weight:700; line-height:1.5; }
+
+/* ── FAMOUS FOR (cartoon) ── */
+.famous-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; }
+.famous-card {
+  padding:22px 14px; border-radius:18px; border:3px solid transparent;
+  background:white; cursor:pointer; text-align:center;
+  font-family:'Nunito',sans-serif;
+  transition:transform 0.2s, box-shadow 0.2s;
+  box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  animation:bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;
+}
+.famous-card:nth-child(1){ animation-delay:0.05s; }
+.famous-card:nth-child(2){ animation-delay:0.12s; }
+.famous-card:nth-child(3){ animation-delay:0.19s; }
+.famous-card:nth-child(4){ animation-delay:0.26s; }
+.famous-card:hover { transform:translateY(-4px); box-shadow:0 7px 0 rgba(0,0,0,0.1); }
+.famous-card.fc-picked { border-color:var(--fc,#9B5DE5); background:color-mix(in oklch,var(--fc,#9B5DE5) 10%,white); transform:translateY(-4px); }
+.famous-icon { font-size:36px; display:block; margin-bottom:8px; }
+.famous-label { font-size:12px; font-weight:800; color:var(--text); line-height:1.3; }
+
+/* ── RESULTS ── */
+.results-card {
+  display:none; background:white; border-radius:24px;
+  padding:48px 36px; text-align:center;
+  box-shadow:var(--card-shadow);
+  border-top:5px solid #FFD700;
+  animation:cardBounceIn 0.5s ease;
+}
+.results-card.active { display:block; }
+.result-emoji { font-size:72px; margin-bottom:12px; animation:mascotBounce 1.5s ease-in-out infinite; display:inline-block; }
+.result-score { font-size:64px; font-weight:900; color:var(--purple); line-height:1; margin-bottom:4px; }
+.result-label { font-size:15px; font-weight:700; color:var(--mid); margin-bottom:20px; }
+.result-msg { font-size:26px; font-weight:900; color:var(--text); margin-bottom:8px; }
+.result-sub { font-size:15px; font-weight:700; color:var(--mid); margin-bottom:32px; line-height:1.5; }
+.restart-btn {
+  display:inline-flex; align-items:center; gap:8px;
+  background:#9B5DE5; color:white;
+  font-family:'Nunito',sans-serif; font-weight:900; font-size:16px;
+  padding:14px 32px; border-radius:100px; border:none; cursor:pointer;
+  box-shadow:0 4px 0 #6a3aab;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.restart-btn:hover { transform:translateY(-2px); box-shadow:0 6px 0 #6a3aab; }
+
+/* ── MASCOT ── */
+.mascot-wrap {
+  position:fixed; bottom:24px; right:24px; z-index:50;
+  display:flex; flex-direction:column; align-items:flex-end; gap:6px;
+  pointer-events:none;
+}
+.mascot-bubble {
+  display:none; background:white; border-radius:14px 14px 0 14px;
+  padding:10px 14px; font-size:13px; font-weight:800; color:var(--text);
+  max-width:200px; text-align:center; line-height:1.4;
+  box-shadow:0 3px 12px rgba(0,0,0,0.12);
+  animation:fadeUp 0.3s ease;
+}
+.mascot-bubble.show { display:block; }
+.mascot-face { font-size:48px; animation:mascotBounce 2s ease-in-out infinite; display:block; }
+
+/* ── CONFETTI ── */
+@keyframes confettiFly {
+  0%   { transform:translate(0,0) rotate(0deg); opacity:1; }
+  100% { transform:translate(var(--dx),calc(var(--dy) + 80px)) rotate(720deg); opacity:0; }
+}
+
+/* ── TWEAKS ── */
+#tweaksPanel {
+  display:none; position:fixed; bottom:24px; left:24px;
+  background:white; border-radius:18px; padding:20px;
+  width:230px; flex-direction:column; gap:14px;
+  z-index:9999; box-shadow:0 8px 0 rgba(0,0,0,0.1), 0 4px 24px rgba(0,0,0,0.12);
+  border-top:4px solid var(--purple);
+}
+#tweaksPanel.open { display:flex; }
+.tw-title { font-weight:900; font-size:15px; color:var(--text); }
+.tw-label { font-size:12px; font-weight:700; color:var(--mid); display:flex; flex-direction:column; gap:6px; }
+.tw-select {
+  font-family:'Nunito',sans-serif; font-weight:700;
+  padding:8px 10px; border-radius:10px; border:2px solid #e0e0e0;
+  font-size:13px; color:var(--text); background:white;
+}
+
+.disc-hint { font-size:13px; font-weight:700; color:var(--mid); margin-bottom:14px; }
+
+/* ── CABLE CAR SCENE (Q1) ── */
+.cable-scene {
+  position:relative; height:168px; border-radius:16px; overflow:hidden;
+  background:linear-gradient(180deg,#87CEEB 0%,#b0d8f0 52%,#7BC67A 100%);
+  border:2px solid rgba(255,255,255,0.5); margin-bottom:8px; cursor:default;
+}
+.cable-wire { position:absolute; top:46px; left:4%; right:4%; height:3px; background:rgba(50,30,10,0.3); border-radius:2px; }
+.cable-wire::before { content:''; position:absolute; top:-2px; left:0; right:0; height:1px; background:rgba(255,255,255,0.45); }
+.cable-car-icon {
+  position:absolute; top:18px; left:4%;
+  font-size:30px; transform:translateX(-50%); z-index:3;
+  transition:left 0.95s cubic-bezier(0.25,0.46,0.45,0.94);
+  filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+.dist-post { position:absolute; bottom:0; cursor:pointer; display:flex; flex-direction:column; align-items:center; transform:translateX(-50%); z-index:4; }
+.dist-post:hover:not(.dp-dim) .dp-sign { transform:scale(1.08) translateY(-2px); }
+.dp-sign {
+  background:white; border-radius:8px; padding:5px 10px;
+  font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; color:var(--text);
+  border:2px solid rgba(0,0,0,0.08); box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  transition:transform 0.2s, border-color 0.25s, background 0.25s; white-space:nowrap;
+}
+.dp-pole { width:3px; height:56px; background:linear-gradient(180deg,#888,#555); border-radius:2px; }
+.dist-post.dp-correct .dp-sign { background:#e8fce8; border-color:#34C759; }
+.dist-post.dp-wrong .dp-sign   { background:#fff0f0; border-color:#FF3B30; animation:shakeWrong 0.4s ease; }
+.dist-post.dp-dim { opacity:0.35; pointer-events:none; }
+
+/* ── CITY PICKER (Q5) ── */
+.city-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.city-card {
+  background:white; border-radius:18px; padding:18px 12px; text-align:center;
+  cursor:pointer; border:3px solid transparent; box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  animation:bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both; font-family:'Nunito',sans-serif;
+}
+.city-card:nth-child(1){animation-delay:.05s} .city-card:nth-child(2){animation-delay:.12s}
+.city-card:nth-child(3){animation-delay:.19s} .city-card:nth-child(4){animation-delay:.26s}
+.city-card:hover { transform:translateY(-4px); box-shadow:0 7px 0 rgba(0,0,0,0.1); }
+.city-emoji-big { font-size:38px; display:block; margin-bottom:8px; }
+.city-name { font-size:15px; font-weight:800; color:var(--text); }
+.city-card.cc-correct { border-color:#34C759; background:#e8fce8; animation:popCorrect 0.4s ease; }
+.city-card.cc-wrong   { border-color:#FF3B30; background:#fff0f0; animation:shakeWrong 0.4s ease; }
+.city-card.cc-dim     { opacity:0.28; filter:grayscale(0.7); pointer-events:none; }
+
+/* ── STAGE / DIAMOND SHOW (Q8) ── */
+.stage-scene { background:linear-gradient(180deg,#0a0520,#1a0838); border-radius:16px; padding:16px 14px; }
+.stage-hint { text-align:center; font-size:11px; font-weight:800; color:rgba(255,215,0,0.8); margin-bottom:14px; letter-spacing:0.1em; text-transform:uppercase; }
+.hotel-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.hotel-card {
+  background:rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.1);
+  border-radius:14px; padding:16px 10px; text-align:center; cursor:pointer;
+  transition:all 0.2s; font-family:'Nunito',sans-serif;
+  animation:bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;
+}
+.hotel-card:nth-child(1){animation-delay:.05s} .hotel-card:nth-child(2){animation-delay:.12s}
+.hotel-card:nth-child(3){animation-delay:.19s} .hotel-card:nth-child(4){animation-delay:.26s}
+.hotel-card:hover { background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.4); transform:translateY(-2px); }
+.hotel-emoji-big { font-size:28px; display:block; margin-bottom:6px; }
+.hotel-name { font-size:11px; font-weight:800; color:rgba(255,255,255,0.9); line-height:1.35; }
+.hotel-card.hc-correct { background:rgba(52,199,89,0.2); border-color:#34C759; animation:popCorrect 0.4s ease; }
+.hotel-card.hc-wrong   { background:rgba(255,59,48,0.15); border-color:#FF3B30; animation:shakeWrong 0.4s ease; }
+.hotel-card.hc-dim     { opacity:0.2; pointer-events:none; }
+
+/* ── TOWER HEIGHTS (Q11) ── */
+.towers-scene { background:linear-gradient(180deg,#87CEEB 0%,#b8e4f9 40%,#a8d986 100%); border-radius:16px; padding:16px 14px 0; overflow:hidden; height:200px; }
+.towers-wrap { display:flex; align-items:flex-end; justify-content:space-around; height:100%; }
+.tower-col { display:flex; flex-direction:column; align-items:center; flex:1; margin:0 5px; cursor:pointer; animation:bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both; }
+.tower-col:nth-child(1){animation-delay:.05s} .tower-col:nth-child(2){animation-delay:.12s}
+.tower-col:nth-child(3){animation-delay:.19s} .tower-col:nth-child(4){animation-delay:.26s}
+.tower-ht-label { font-size:11px; font-weight:900; color:var(--text); background:white; border-radius:6px; padding:2px 6px; margin-bottom:4px; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,0.1); font-family:'Nunito',sans-serif; }
+.tower-ant { width:3px; height:10px; border-radius:2px; margin-bottom:-2px; background:rgba(0,0,0,0.3); }
+.tower-body-b {
+  width:100%; border-radius:4px 4px 0 0;
+  background-image: repeating-linear-gradient(0deg,rgba(255,255,255,0.18) 0,rgba(255,255,255,0.18) 4px,transparent 4px,transparent 12px), repeating-linear-gradient(90deg,rgba(255,255,255,0.1) 0,rgba(255,255,255,0.1) 3px,transparent 3px,transparent 12px);
+}
+.tower-col:nth-child(1) .tower-body-b { background-color:#FF6B6B; }
+.tower-col:nth-child(2) .tower-body-b { background-color:#9B5DE5; }
+.tower-col:nth-child(3) .tower-body-b { background-color:#4A90D9; }
+.tower-col:nth-child(4) .tower-body-b { background-color:#FFB830; }
+.tower-col:hover .tower-body-b { filter:brightness(1.12); }
+.tower-col.tc-correct { animation:popCorrect 0.4s ease; }
+.tower-col.tc-correct .tower-body-b { box-shadow:0 0 22px rgba(52,199,89,0.6); border:2px solid #34C759; }
+.tower-col.tc-wrong { animation:shakeWrong 0.4s ease; }
+.tower-col.tc-dim { opacity:0.28; pointer-events:none; }
+
+/* ── FLAGS (Q13) ── */
+.flag-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.flag-card {
+  border-radius:14px; overflow:hidden; cursor:pointer;
+  border:3px solid rgba(0,0,0,0.07); box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  transition:transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  animation:bubbleIn 0.5s cubic-bezier(0.34,1.5,0.64,1) both;
+}
+.flag-card:nth-child(1){animation-delay:.05s} .flag-card:nth-child(2){animation-delay:.12s}
+.flag-card:nth-child(3){animation-delay:.19s} .flag-card:nth-child(4){animation-delay:.26s}
+.flag-card:hover { transform:translateY(-3px); box-shadow:0 6px 0 rgba(0,0,0,0.1); }
+.flag-vis { height:56px; overflow:hidden; }
+.flag-lbl { background:white; padding:8px; text-align:center; font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; color:var(--text); }
+.flag-card.fg-correct { border-color:#34C759; animation:popCorrect 0.4s ease; }
+.flag-card.fg-correct .flag-lbl { background:#e8fce8; }
+.flag-card.fg-wrong   { border-color:#FF3B30; animation:shakeWrong 0.4s ease; }
+.flag-card.fg-wrong .flag-lbl { background:#fff0f0; }
+.flag-card.fg-dim     { opacity:0.28; filter:grayscale(0.7); pointer-events:none; }
+</style>
+</head>
+<body>
+
+<!-- Scene BG -->
+<div class="scene-bg">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="cloud c4"></div>
+</div>
+
+<!-- Confetti layer -->
+<div id="confetti" style="position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden;"></div>
+
+<!-- Mascot -->
+<div class="mascot-wrap">
+  <div class="mascot-bubble" id="mascotBubble">Great job! 🎉</div>
+  <span class="mascot-face" id="mascotFace">😸</span>
+</div>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <section class="quiz-hero" id="quizHero">
+    <div class="hero-mascot">😸</div>
+    <h1>How well do you<br>know Macao?</h1>
+    <p>14 fun questions about Macao & Hong Kong!</p>
+    <div class="hero-badges">
+      <span class="hero-badge">🎯 14 Questions</span>
+      <span class="hero-badge">🏆 Score Tracker</span>
+      <span class="hero-badge">🚁 Interactive!</span>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">
+      Let's Play! 🎮
+    </button>
+  </section>
+
+  <!-- QUIZ AREA -->
+  <div class="quiz-wrap" id="quizWrap">
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span class="progress-label" id="progressLabel">Question 1 of 13</span>
+        <span class="score-badge" id="scoreBadge">⭐ 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%">
+          <div class="progress-cat">🐱</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="question-card" id="questionCard">
+      <div class="q-number" id="qNumber">Q1</div>
+      <div class="q-text" id="qText"></div>
+      <div id="qBody"></div>
+      <div class="feedback-bar" id="feedbackBar"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next →</button>
+    </div>
+
+    <!-- Results -->
+    <div class="results-card" id="resultsCard">
+      <div class="result-emoji" id="resultEmoji">🎉</div>
+      <div class="result-score" id="resultScore">0/11</div>
+      <div class="result-label">correct answers</div>
+      <div class="result-msg" id="resultMsg">Awesome!</div>
+      <div class="result-sub" id="resultSub">You know your Macao!</div>
+      <button class="restart-btn" onclick="restartQuiz()">
+        🔄 Play Again
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tweaks Panel -->
+<div id="tweaksPanel">
+  <div class="tw-title">🎛️ Tweaks</div>
+  <label class="tw-label">
+    Quiz Interaction Style
+    <select class="tw-select" id="modeSelect" onchange="setMode(this.value)">
+      <option value="bubbles">🫧 Bubble Pop</option>
+      <option value="cards">🃏 Card Flip</option>
+    </select>
+  </label>
+  <label class="tw-label">
+    Card Border Color
+    <select class="tw-select" id="accentSelect" onchange="setAccent(this.value)">
+      <option value="#9B5DE5">💜 Purple</option>
+      <option value="#FF6B35">🧡 Orange</option>
+      <option value="#00C9A7">💚 Teal</option>
+      <option value="#4A90D9">💙 Blue</option>
+    </select>
+  </label>
+</div>
+
+<script>
+const QUESTIONS = [
+  { type:'mcq', text:'Ngong Ping 360, the famous cable car in Hong Kong, connects Tung Chung with Ngong Ping village. What is the approximate total length of the ride?', options:['2.5 km','3.8 km','5.7 km','7.2 km'], answer:2, fact:'5.7 km — one of the longest and most scenic cable car rides in Asia!' },
+  { type:'mcq', text:'Macao is often called the "Las Vegas of Asia." What is Macao most famous for?', options:['Tea Plantations','Casinos & Gaming','Automobile Manufacturing','Space Research'], answer:1, fact:'Casinos & Gaming — Macao\'s gaming revenue once surpassed all of Las Vegas!' },
+  { type:'mcq', text:'Both Hong Kong and Macau have their own currencies. What are they?', options:['Yuan and Yen','HK Dollar and Macau Pataca','Dollar and Euro','Rupee and Peso'], answer:1, fact:'Hong Kong Dollar (HKD) and Macau Pataca (MOP) — unique to their respective regions!' },
+  { type:'mcq', text:'Ocean Park Hong Kong is best known for combining which two experiences?', options:['Wildlife Conservation & Amusement Rides','Shopping & Fine Dining','Film Studios & Museums','Beaches & Water Sports'], answer:0, fact:'Wildlife conservation meets thrilling rides — that unique combo makes Ocean Park iconic!' },
+  { type:'mcq', text:'The Venetian Macao is inspired by which iconic Italian city?', options:['Rome','Milan','Venice','Florence'], answer:2, fact:'Venice! It even has indoor canals and gondola rides — right inside the resort!' },
+  { type:'mcq', text:'Grand Kowloon hotel is located in which part of Hong Kong?', options:['Hong Kong Island','Kowloon Peninsula','Lantau Island','New Territories'], answer:1, fact:'Kowloon Peninsula — with stunning views of Victoria Harbour and the city skyline!' },
+  { type:'discussion', text:'What is Macao famous for?', chips:['Casinos & Gaming Capital','Portuguese Heritage & Historic Sites','Unique Macanese Cuisine','Entertainment & Luxury Tourism'], prompt:'Pick all that apply — share your thoughts!' },
+  { type:'mcq', text:'The "Diamond Show" in Macao — a giant diamond rising from water with lights and music — is inside which hotel?', options:['The Venetian Macao','MGM Cotai','Wynn Macau','Galaxy Macau'], answer:2, fact:'Wynn Macau — the Performance Lake show is one of Macao\'s most jaw-dropping spectacles!' },
+  { type:'mcq', text:'The Eiffel Tower replica in Macao is located inside which resort?', options:['The Venetian Macao','Parisian Macao','Galaxy Macau','City of Dreams'], answer:1, fact:'Parisian Macao! The replica is about half the size of the real Eiffel Tower in Paris.' },
+  { type:'mcq', text:'Victoria Peak, the highest point on Hong Kong Island, is popularly known as?', options:['The Hill','The Summit','The Peak','Sky Point'], answer:2, fact:'"The Peak" — one of the most breathtaking city panoramas in the world!' },
+  { type:'mcq', text:'Macau Tower offers one of the world\'s highest commercial bungee jumps. How tall is the tower?', options:['220 meters','338 meters','450 meters','520 meters'], answer:1, fact:'338 metres! The bungee jump from the observation deck is an extreme thrill experience.' },
+  { type:'discussion', text:'What is the best way to travel from Hong Kong to Macao?', chips:['Ferry','Bus','Car','Helicopter'], prompt:'Pick your ride — we\'ll reveal our choice!' },
+  { type:'mcq', text:'Macao is a unique blend of East and West due to its history as a former colony of which European country?', options:['Spain','France','Portugal','Netherlands'], answer:2, fact:'Portugal! Macao was a Portuguese colony for over 400 years, shaping its culture deeply.' }
+];
+
+const LETTERS = ['A','B','C','D'];
+const COLORS  = ['--oa','--ob','--oc','--od'];
+let cur = 0, score = 0, answered = false;
+let quizMode = 'bubbles';
+const mcqTotal = QUESTIONS.filter(q=>q.type==='mcq').length;
+
+/* ── State persistence ── */
+function save() {
+  localStorage.setItem('mq2_cur',cur);
+  localStorage.setItem('mq2_score',score);
+  localStorage.setItem('mq2_on','1');
+  localStorage.setItem('mq2_mode',quizMode);
+}
+
+/* ── Start ── */
+function startQuiz() {
+  cur=0; score=0;
+  document.getElementById('quizHero').style.display='none';
+  document.getElementById('quizWrap').classList.add('active');
+  renderQ();
+  save();
+}
+
+/* ── Render Question ── */
+function renderQ() {
+  answered = false;
+  const q = QUESTIONS[cur];
+  document.getElementById('qNumber').textContent = `Q${cur+1}`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('feedbackBar').className = 'feedback-bar';
+  document.getElementById('feedbackBar').innerHTML = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+  document.getElementById('nextBtn').textContent = cur===QUESTIONS.length-1 ? 'See Results! 🏆' : 'Next →';
+  document.getElementById('progressLabel').textContent = `Question ${cur+1} of ${QUESTIONS.length}`;
+  document.getElementById('scoreBadge').textContent = `⭐ ${score}`;
+  document.getElementById('progressFill').style.width = `${(cur/QUESTIONS.length)*100}%`;
+
+  // Card accent
+  document.querySelector('.question-card').style.borderTopColor = 
+    getComputedStyle(document.documentElement).getPropertyValue('--purple') || '#9B5DE5';
+
+  // Bounce in
+  const card = document.getElementById('questionCard');
+  card.style.animation='none'; card.offsetHeight;
+  card.style.animation='cardBounceIn 0.45s cubic-bezier(0.34,1.4,0.64,1)';
+
+  setMascot('thinking','Hmm, what\'s the answer? 🤔');
+
+  const body = document.getElementById('qBody');
+  if (q.type==='mcq') {
+    if (SPECIALS[cur]) { SPECIALS[cur](q,body); }
+    else { quizMode==='cards' ? renderFlipCards(q,body) : renderBubbles(q,body); }
+  } else if (q.chips && q.chips.includes('Ferry')) {
+    renderTravelScene(body);
+  } else {
+    renderFamousFor(q,body);
+  }
+}
+
+/* ── Bubble Mode ── */
+function renderBubbles(q,body) {
+  body.innerHTML=`<div class="mode-hint">🫧 Tap the right bubble!</div>
+  <div class="bubble-grid">${q.options.map((opt,i)=>`
+    <button class="bubble-opt" onclick="selectOpt(${i})" data-i="${i}">
+      <span class="bubble-letter">${LETTERS[i]}</span>
+      <span>${opt}</span>
+    </button>`).join('')}</div>`;
+}
+
+/* ── Card Flip Mode ── */
+function renderFlipCards(q,body) {
+  body.innerHTML=`<div class="mode-hint">🃏 Flip a card to pick your answer!</div>
+  <div class="flip-grid">${q.options.map((opt,i)=>`
+    <div class="flip-card" id="fc${i}" onclick="flipAndSelect(${i})">
+      <div class="flip-inner">
+        <div class="flip-front">❓</div>
+        <div class="flip-back">
+          <span class="flip-badge">${LETTERS[i]}</span>
+          <span style="font-weight:800;font-size:13px">${opt}</span>
+        </div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function flipAndSelect(idx) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[cur];
+
+  for(let i=0;i<q.options.length;i++){
+    const fc = document.getElementById('fc'+i);
+    fc.classList.add('flipped');
+    fc.onclick = null;
+  }
+
+  setTimeout(()=>{
+    for(let i=0;i<q.options.length;i++){
+      const fc = document.getElementById('fc'+i);
+      if(i===q.answer)       fc.classList.add('fc-correct');
+      else if(i===idx && idx!==q.answer) fc.classList.add('fc-wrong');
+      else if(i!==q.answer)  fc.classList.add('fc-dim');
+    }
+    afterAnswer(idx, q);
+  }, 620);
+}
+
+/* ── Select Option (bubbles) ── */
+function selectOpt(idx) {
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[cur];
+  const btns = document.querySelectorAll('.bubble-opt');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.answer)                b.classList.add('b-correct');
+    else if(i===idx&&idx!==q.answer)b.classList.add('b-wrong');
+    else                            b.classList.add('b-dim');
+  });
+  afterAnswer(idx,q);
+}
+
+function afterAnswer(idx, q) {
+  const fb = document.getElementById('feedbackBar');
+  if(idx===q.answer){
+    score++;
+    fb.className='feedback-bar fb-correct show';
+    fb.innerHTML=`<span>✅</span><span><strong>Correct!</strong> ${q.fact}</span>`;
+    setMascot('happy','Woohoo! That\'s right! 🎉');
+    spawnConfetti();
+  } else {
+    fb.className='feedback-bar fb-wrong show';
+    fb.innerHTML=`<span>❌</span><span><strong>Not quite!</strong> ${q.fact}</span>`;
+    setMascot('sad','Oops! Better luck next one 😿');
+  }
+  document.getElementById('nextBtn').className='next-btn show';
+  document.getElementById('scoreBadge').textContent=`⭐ ${score}`;
+  save();
+}
+
+/* ── Travel Scene ── */
+function renderTravelScene(body) {
+  body.innerHTML = `
+  <p class="disc-hint" style="text-align:center;font-size:13px;font-weight:800;color:#9B5DE5;margin-bottom:12px">
+    🎮 Tap your favourite way to travel!
+  </p>
+  <div class="travel-scene">
+    <div class="ts-header">
+      <span class="ts-city">🏙 Hong Kong</span>
+      <span class="ts-arrow">─── ▶ ───</span>
+      <span class="ts-city">Macao 🌟</span>
+    </div>
+
+    <!-- SKY -->
+    <div class="ts-sky-lane">
+      <!-- mini clouds -->
+      <div style="position:absolute;top:10px;left:30%;width:60px;height:16px;background:white;border-radius:20px;opacity:0.7"></div>
+      <div style="position:absolute;top:8px;left:60%;width:40px;height:12px;background:white;border-radius:16px;opacity:0.5"></div>
+      <div class="ts-veh tv-heli-idle" id="tv-heli" onclick="pickVehicle('heli')" style="top:16px">
+        <div class="tv-label">Helicopter</div>
+        <svg width="88" height="38" viewBox="0 0 88 38" fill="none">
+          <g class="tv-rotor"><rect x="4" y="3" width="80" height="5" rx="2.5" fill="rgba(255,255,255,0.8)"/></g>
+          <circle cx="44" cy="5.5" r="3" fill="#C77DFF"/>
+          <rect x="2" y="19" width="22" height="5" rx="2" fill="#7B3DB5"/>
+          <rect x="1" y="13" width="3" height="17" rx="1.5" fill="rgba(200,150,255,0.7)"/>
+          <ellipse cx="50" cy="22" rx="22" ry="11" fill="#9B5DE5"/>
+          <ellipse cx="65" cy="22" rx="12" ry="9" fill="#4ECDC4" opacity="0.8"/>
+          <ellipse cx="66" cy="21" rx="7" ry="5" fill="rgba(180,255,255,0.4)"/>
+          <line x1="38" y1="32" x2="38" y2="36" stroke="#7B3DB5" stroke-width="2"/>
+          <line x1="60" y1="32" x2="60" y2="36" stroke="#7B3DB5" stroke-width="2"/>
+          <line x1="32" y1="36" x2="66" y2="36" stroke="#7B3DB5" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- BUS ROAD -->
+    <div class="ts-road-top">
+      <div class="ts-veh" id="tv-bus" onclick="pickVehicle('bus')" style="top:5px">
+        <div class="tv-label">Bus</div>
+        <svg width="90" height="44" viewBox="0 0 90 44" fill="none">
+          <rect x="2" y="4" width="82" height="30" rx="5" fill="#FF6B6B"/>
+          <rect x="70" y="7" width="13" height="24" rx="3" fill="#d94f4f"/>
+          <rect x="72" y="9" width="9" height="11" rx="1.5" fill="rgba(180,240,255,0.7)"/>
+          <rect x="8" y="10" width="11" height="9" rx="1.5" fill="rgba(180,240,255,0.55)"/>
+          <rect x="24" y="10" width="11" height="9" rx="1.5" fill="rgba(180,240,255,0.55)"/>
+          <rect x="40" y="10" width="11" height="9" rx="1.5" fill="rgba(180,240,255,0.55)"/>
+          <rect x="56" y="10" width="11" height="9" rx="1.5" fill="rgba(180,240,255,0.55)"/>
+          <rect x="2" y="22" width="82" height="4" rx="1" fill="#b84040" opacity="0.55"/>
+          <ellipse cx="84" cy="21" rx="4" ry="3" fill="rgba(255,250,160,0.9)"/>
+          <circle cx="18" cy="38" r="6" fill="#222233"/><circle cx="18" cy="38" r="2.5" fill="#666"/>
+          <circle cx="66" cy="38" r="6" fill="#222233"/><circle cx="66" cy="38" r="2.5" fill="#666"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- CAR ROAD -->
+    <div class="ts-road-bot">
+      <div class="ts-veh" id="tv-car" onclick="pickVehicle('car')" style="top:6px">
+        <div class="tv-label">Car</div>
+        <svg width="80" height="38" viewBox="0 0 80 38" fill="none">
+          <rect x="2" y="20" width="76" height="13" rx="3" fill="#FFD93D"/>
+          <path d="M15 20 L21 8 L57 8 L65 20Z" fill="#e6c22a"/>
+          <path d="M18 19 L23 9 L32 9 L29 19Z" fill="rgba(180,235,255,0.5)"/>
+          <path d="M54 9 L63 19 L53 19Z" fill="rgba(180,235,255,0.5)"/>
+          <rect x="33" y="9" width="18" height="10" rx="1" fill="rgba(180,235,255,0.45)"/>
+          <ellipse cx="76" cy="24" rx="4" ry="3" fill="rgba(255,250,160,0.9)"/>
+          <rect x="2" y="21" width="5" height="5" rx="1" fill="rgba(255,80,60,0.8)"/>
+          <circle cx="18" cy="33" r="5" fill="#222233"/><circle cx="18" cy="33" r="2" fill="#777"/>
+          <circle cx="60" cy="33" r="5" fill="#222233"/><circle cx="60" cy="33" r="2" fill="#777"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- WATER -->
+    <div class="ts-water-lane">
+      <svg style="position:absolute;bottom:0;left:0;width:200%;height:22px;opacity:0.4" viewBox="0 0 400 22" preserveAspectRatio="none">
+        <path d="M0 11 Q25 2 50 11 Q75 20 100 11 Q125 2 150 11 Q175 20 200 11 Q225 2 250 11 Q275 20 300 11 Q325 2 350 11 Q375 20 400 11 L400 22 L0 22Z" fill="white">
+          <animateTransform attributeName="transform" type="translate" from="0 0" to="-200 0" dur="2.5s" repeatCount="indefinite"/>
+        </path>
+      </svg>
+      <!-- Sun glints -->
+      <div style="position:absolute;top:12px;right:20%;width:60px;height:4px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);border-radius:2px"></div>
+      <div class="ts-veh tv-ferry-idle" id="tv-ferry" onclick="pickVehicle('ferry')" style="top:10px">
+        <div class="tv-label">Ferry</div>
+        <svg width="94" height="46" viewBox="0 0 94 46" fill="none">
+          <path d="M4 28 L10 42 L84 42 L90 28Z" fill="#4ECDC4"/>
+          <path d="M10 42 L84 42" stroke="#1a9ba0" stroke-width="2"/>
+          <rect x="14" y="13" width="62" height="17" rx="3" fill="white" opacity="0.9"/>
+          <rect x="20" y="18" width="10" height="7" rx="1.5" fill="rgba(74,144,217,0.5)"/>
+          <rect x="36" y="18" width="10" height="7" rx="1.5" fill="rgba(74,144,217,0.5)"/>
+          <rect x="52" y="18" width="10" height="7" rx="1.5" fill="rgba(74,144,217,0.5)"/>
+          <rect x="67" y="18" width="6" height="7" rx="1.5" fill="rgba(74,144,217,0.4)"/>
+          <rect x="19" y="4" width="8" height="11" rx="2" fill="#FF6B6B"/>
+          <circle cx="23" cy="2.5" r="3" fill="rgba(255,255,255,0.3)"/>
+          <path d="M76 13 L88 28 L76 28Z" fill="#3ab8b8" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="tv-winner" id="tvWinner">
+    <div class="tv-w-emoji" id="tvEmoji"></div>
+    <div class="tv-w-title" id="tvTitle"></div>
+    <div class="tv-w-sub"   id="tvSub"></div>
+  </div>`;
+}
+
+function pickVehicle(id) {
+  const el = document.getElementById('tv-'+id);
+  if(!el||el.dataset.picked) return;
+  el.dataset.picked='1';
+  const info = {
+    heli:  {emoji:'🚁',title:'Helicopter!',sub:'Sky-high & spectacular — the fastest crossing with breathtaking aerial views!'},
+    bus:   {emoji:'🚌',title:'By Bus!',sub:'Cruise across the iconic HK–Zhuhai–Macao Bridge — one of the world\'s longest!'},
+    car:   {emoji:'🚗',title:'Road Trip!',sub:'Drive the 55km bridge yourself for an unforgettable coastal journey!'},
+    ferry: {emoji:'⛴️',title:'Ferry Ride!',sub:'The classic 1-hour sea crossing with gorgeous harbour views!'}
+  };
+  el.style.animation = 'tvRace 1.9s cubic-bezier(0.18,0,0.72,1) forwards';
+  el.classList.remove('tv-heli-idle','tv-ferry-idle');
+  ['heli','bus','car','ferry'].forEach(v=>{ if(v!==id) document.getElementById('tv-'+v).classList.add('tv-dim'); });
+  setTimeout(()=>{
+    const m=info[id];
+    document.getElementById('tvEmoji').textContent=m.emoji;
+    document.getElementById('tvTitle').textContent=m.title;
+    document.getElementById('tvSub').textContent=m.sub;
+    document.getElementById('tvWinner').classList.add('show');
+    document.getElementById('nextBtn').className='next-btn show';
+    setMascot('happy','Great pick! 🎉');
+    spawnConfetti();
+  }, 2000);
+}
+
+/* ── Famous For ── */
+function renderFamousFor(q,body) {
+  const icons=['🎰','🏛️','🍜','🎭'];
+  const colors=['#FF6B6B','#9B5DE5','#FFB830','#00C9A7'];
+  body.innerHTML=`<p class="disc-hint" style="text-align:center">Pick all that apply! 👇</p>
+  <div class="famous-grid">
+  ${q.chips.map((c,i)=>`
+    <button class="famous-card" onclick="this.classList.toggle('fc-picked')"
+      style="--fc:${colors[i]}">
+      <span class="famous-icon">${icons[i]}</span>
+      <span class="famous-label">${c}</span>
+    </button>`).join('')}
+  </div>`;
+  setTimeout(()=>{ document.getElementById('nextBtn').className='next-btn show'; },700);
+  setMascot('thinking','What makes Macao special? 🤔');
+}
+
+/* ── SPECIAL INTERACTIONS ── */
+const SPECIALS = { 0:renderCableCar, 4:renderCityPicker, 7:renderSpotlight, 10:renderTowers, 12:renderFlags };
+
+const CABLE_POS = ['16%','34%','58%','80%'];
+
+function renderCableCar(q, body) {
+  body.innerHTML = `
+  <p class="disc-hint" style="text-align:center">🚡 Tap a distance marker — where does the cable car end up?</p>
+  <div class="cable-scene">
+    <div class="cable-wire"></div>
+    <div class="cable-car-icon" id="cableCar">🚡</div>
+    ${q.options.map((opt,i)=>`
+      <div class="dist-post" id="dp${i}" onclick="selectCable(${i})" style="left:${CABLE_POS[i]}">
+        <div class="dp-sign">${opt}</div>
+        <div class="dp-pole"></div>
+      </div>`).join('')}
+    <div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(180deg,#7BC67A,#5aab58)"></div>
+    <div style="position:absolute;bottom:36px;left:6%;font-size:26px;line-height:1">🌲</div>
+    <div style="position:absolute;bottom:36px;left:22%;font-size:20px;line-height:1;opacity:.7">🌳</div>
+    <div style="position:absolute;bottom:32px;right:7%;font-size:22px;line-height:1">🏔️</div>
+  </div>`;
+}
+
+function selectCable(idx) {
+  if(answered) return;
+  answered = true;
+  const car = document.getElementById('cableCar');
+  car.style.left = CABLE_POS[idx];
+  const q = QUESTIONS[cur];
+  setTimeout(()=>{
+    for(let i=0;i<4;i++){
+      const dp = document.getElementById('dp'+i);
+      if(!dp) continue;
+      if(i===q.answer)                  dp.classList.add('dp-correct');
+      else if(i===idx&&idx!==q.answer)  dp.classList.add('dp-wrong');
+      else                              dp.classList.add('dp-dim');
+    }
+    afterAnswer(idx, q);
+  }, 980);
+}
+
+function renderCityPicker(q, body) {
+  const emojis = ['🏛️','🎨','🚣','🌸'];
+  body.innerHTML = `
+  <p class="disc-hint" style="text-align:center">🗺️ Which Italian city inspired The Venetian Macao?</p>
+  <div class="city-grid">
+    ${q.options.map((opt,i)=>`
+      <div class="city-card" onclick="selectSpecial(${i},'cc')" id="cc${i}">
+        <span class="city-emoji-big">${emojis[i]}</span>
+        <span class="city-name">${opt}</span>
+      </div>`).join('')}
+  </div>`;
+}
+
+function renderSpotlight(q, body) {
+  const emojis = ['🎰','🌃','💎','🌌'];
+  body.innerHTML = `
+  <div class="stage-scene">
+    <div class="stage-hint">✨ Which hotel hosts the legendary Diamond Show?</div>
+    <div class="hotel-grid">
+      ${q.options.map((opt,i)=>`
+        <div class="hotel-card" onclick="selectSpecial(${i},'hc')" id="hc${i}">
+          <span class="hotel-emoji-big">${emojis[i]}</span>
+          <span class="hotel-name">${opt}</span>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderTowers(q, body) {
+  const px = [220,338,450,520].map(h => Math.round((h/520)*128));
+  body.innerHTML = `
+  <p class="disc-hint" style="text-align:center">🏗️ Tap the tower that matches Macau Tower's height!</p>
+  <div class="towers-scene">
+    <div class="towers-wrap">
+      ${q.options.map((opt,i)=>`
+        <div class="tower-col" onclick="selectSpecial(${i},'tc')" id="tc${i}">
+          <div class="tower-ht-label">${opt}</div>
+          <div class="tower-ant"></div>
+          <div class="tower-body-b" style="height:${px[i]}px"></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderFlags(q, body) {
+  const FLAGS = [
+    { name:'Spain',       vis:`<div style="display:flex;flex-direction:column;height:56px"><div style="flex:1;background:#c60b1e"></div><div style="flex:2;background:#f1bf00"></div><div style="flex:1;background:#c60b1e"></div></div>` },
+    { name:'France',      vis:`<div style="display:flex;height:56px"><div style="flex:1;background:#0055a4"></div><div style="flex:1;background:#fff"></div><div style="flex:1;background:#ef4135"></div></div>` },
+    { name:'Portugal',    vis:`<div style="display:flex;height:56px;position:relative"><div style="flex:2;background:#009c3b"></div><div style="flex:3;background:#c00000"></div><div style="position:absolute;left:37%;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:rgba(255,220,0,0.9);border:2px solid rgba(255,255,80,0.6)"></div></div>` },
+    { name:'Netherlands', vis:`<div style="display:flex;flex-direction:column;height:56px"><div style="flex:1;background:#ae1c28"></div><div style="flex:1;background:#fff"></div><div style="flex:1;background:#21468b"></div></div>` }
+  ];
+  body.innerHTML = `
+  <p class="disc-hint" style="text-align:center">🌍 Which country colonised Macao for over 400 years?</p>
+  <div class="flag-grid">
+    ${FLAGS.map((f,i)=>`
+      <div class="flag-card" onclick="selectSpecial(${i},'fg')" id="fg${i}">
+        <div class="flag-vis">${f.vis}</div>
+        <div class="flag-lbl">${f.name}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function selectSpecial(idx, prefix) {
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[cur];
+  for(let i=0;i<q.options.length;i++){
+    const el = document.getElementById(prefix+i);
+    if(!el) continue;
+    el.onclick = null;
+    if(i===q.answer)                  el.classList.add(prefix+'-correct');
+    else if(i===idx&&idx!==q.answer)  el.classList.add(prefix+'-wrong');
+    else                              el.classList.add(prefix+'-dim');
+  }
+  afterAnswer(idx, q);
+}
+
+/* ── Next ── */
+function nextQuestion() {
+  cur++;
+  if(cur>=QUESTIONS.length) { showResults(); }
+  else { renderQ(); }
+  save();
+}
+
+/* ── Results ── */
+function showResults() {
+  document.getElementById('questionCard').style.display='none';
+  document.getElementById('progressFill').style.width='100%';
+  const pct=score/mcqTotal;
+  let e,m,s;
+  if(pct===1)      {e='🏆';m='Perfect Score!';s='You\'re a true Macao expert!';}
+  else if(pct>=0.8){e='🎉';m='Outstanding!';s='You really know Macao & Hong Kong!';}
+  else if(pct>=0.6){e='🌟';m='Well Done!';s='Great knowledge of the Pearl of the Orient!';}
+  else if(pct>=0.4){e='👏';m='Good Effort!';s='There\'s so much more to discover in Macao!';}
+  else             {e='✈️';m='Time to Explore!';s='Macao has amazing secrets waiting for you!';}
+  document.getElementById('resultEmoji').textContent=e;
+  document.getElementById('resultScore').textContent=`${score}/${mcqTotal}`;
+  document.getElementById('resultMsg').textContent=m;
+  document.getElementById('resultSub').textContent=s;
+  document.getElementById('resultsCard').classList.add('active');
+  setMascot('happy','Quiz done! Amazing! 🏆');
+  spawnConfetti(); spawnConfetti(); spawnConfetti();
+}
+
+function restartQuiz() {
+  document.getElementById('resultsCard').classList.remove('active');
+  document.getElementById('questionCard').style.display='';
+  cur=0; score=0; renderQ(); save();
+}
+
+/* ── Mascot ── */
+const FACES={thinking:'🤔',happy:'😸',sad:'😿',idle:'😸'};
+const MASK_IDLE_MSGS=['You\'ve got this! 💪','Thinking... 🤔','Go on, pick one! 😺'];
+let mascotTimer=null;
+function setMascot(state,msg) {
+  document.getElementById('mascotFace').textContent=FACES[state]||'😸';
+  const b=document.getElementById('mascotBubble');
+  b.textContent=msg; b.classList.add('show');
+  clearTimeout(mascotTimer);
+  mascotTimer=setTimeout(()=>{ b.classList.remove('show'); },2800);
+}
+
+/* ── Confetti ── */
+function spawnConfetti() {
+  const container=document.getElementById('confetti');
+  const colors=['#FF6B6B','#4ECDC4','#FFD93D','#C77DFF','#4A90D9','#7BC67A','#FF6B35'];
+  const cx=window.innerWidth/2, cy=window.innerHeight*0.4;
+  for(let i=0;i<40;i++){
+    const p=document.createElement('div');
+    const dx=(Math.random()-0.5)*200, dy=-(50+Math.random()*100);
+    const size=4+Math.random()*6;
+    p.style.cssText=`position:absolute;left:${cx}px;top:${cy}px;width:${size}px;height:${size}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+      animation:confettiFly ${0.8+Math.random()*0.9}s ease-out forwards;
+      --dx:${dx}px;--dy:${dy}px;pointer-events:none;`;
+    container.appendChild(p);
+    setTimeout(()=>p.remove(),1800);
+  }
+}
+
+/* ── Tweaks ── */
+window.addEventListener('message',e=>{
+  if(e.data?.type==='__activate_edit_mode')   document.getElementById('tweaksPanel').classList.add('open');
+  if(e.data?.type==='__deactivate_edit_mode') document.getElementById('tweaksPanel').classList.remove('open');
+});
+window.parent.postMessage({type:'__edit_mode_available'},'*');
+
+const TWEAK_DEFAULS = /*EDITMODE-BEGIN*/{
+  "quizMode": "bubbles",
+  "accentColor": "#00C9A7"
+}/*EDITMODE-END*/;
+
+function setMode(v) {
+  quizMode=v;
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{quizMode:v}},'*');
+}
+function setAccent(v) {
+  document.documentElement.style.setProperty('--purple',v);
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{accentColor:v}},'*');
+}
+
+/* ── Init / restore ── */
+window.addEventListener('DOMContentLoaded',()=>{
+  const t=TWEAK_DEFAULS;
+  quizMode=t.quizMode||'bubbles';
+  document.getElementById('modeSelect').value=quizMode;
+  document.documentElement.style.setProperty('--purple',t.accentColor||'#9B5DE5');
+
+  if(localStorage.getItem('mq2_on')){
+    cur=parseInt(localStorage.getItem('mq2_cur')||'0');
+    score=parseInt(localStorage.getItem('mq2_score')||'0');
+    const saved=localStorage.getItem('mq2_mode');
+    if(saved){ quizMode=saved; document.getElementById('modeSelect').value=saved; }
+    document.getElementById('quizHero').style.display='none';
+    document.getElementById('quizWrap').classList.add('active');
+    if(cur>=QUESTIONS.length) showResults(); else renderQ();
+  }
+});
+</script>
+</body>
+</html>
